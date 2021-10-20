@@ -1,11 +1,13 @@
 const Market = artifacts.require("NFTMarket");
-const GameItem = artifacts.require("GameItem");
+const Gamja = artifacts.require("Gamja");
 
 module.exports = async function(deployer) {
-  // Deploy market
-  await deployer.deploy(Market);
-  const market = await Market.deployed()
-
   // Deploy gameItem
-  await deployer.deploy(GameItem, market.address);
+  await deployer.deploy(Gamja);
+  const gamja = await Gamja.deployed();
+  // Deploy market
+  await deployer.deploy(Market, gamja.address);
+  const market = await Market.deployed();
+
+  await gamja.setApprovalForAll(market.address);
 };
