@@ -1,5 +1,5 @@
+const Market = artifacts.require("NFTMarket");
 const GameItem = artifacts.require("GameItem");
-const Market = artifacts.require("Market");
 
 module.exports = async function(deployer) {
   // Deploy market
