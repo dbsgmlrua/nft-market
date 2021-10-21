@@ -1,6 +1,6 @@
 const { assert } = require('chai');
 const Market = artifacts.require("./NFTMarket.sol");
-const GameItem = artifacts.require("./GameItem.sol");
+const GameItem = artifacts.require("./Gamja.sol");
 
 require('chai')
     .use(require('chai-as-promised'))
@@ -10,7 +10,7 @@ function tokens(n) {
     return web3.utils.toWei(n, 'ether');
 }
 
-contract('NFTMarket', (accounts) => {
+contract('NFTMarket', ([deployer, creator, buyer]) => {
     let market
     let gameitem
 
@@ -38,58 +38,83 @@ contract('NFTMarket', (accounts) => {
 
         it('market testing', async () => {
             let listingPrice = await market.listingPrice()
-            const auctionPrice = tokens('1')
+            const auctionPrice = tokens('50')
             // // console.log("auctionPrice", auctionPrice.toString())
-            
-            createItem1 = await market.createItem("https://test.com/1", auctionPrice, {value: listingPrice})
-            createItem2 = await market.createItem("https://test.com/2", auctionPrice, {value: listingPrice})
 
-            let result = await market.getTokenURI(createItem1.logs[0].args[0].toNumber())
+            gameitem1 = await gameitem.createToken("https://test.com/1", {from: creator})
+            gameitem2 = await gameitem.createToken("https://test.com/2", {from: creator})
+            gameitem3 = await gameitem.createToken("https://test.com/3", {from: creator})
+            gameitem4 = await gameitem.createToken("https://test.com/4", {from: creator})
+            gameitem5 = await gameitem.createToken("https://test.com/5", {from: creator})
+
+            // console.log("gameitem1", gameitem1)  
+            // console.log("gameitem1 Id", gameitem1.logs[0].args[2].toString())   
+            tokenURI = await gameitem.tokenURI(1)
+            // console.log("tokenURI", tokenURI)
+            
+            createItem1 = await market.createItem(gameitem.address, gameitem1.logs[0].args[2].toNumber(), auctionPrice, {from: creator, value: listingPrice})
+            createItem2 = await market.createItem(gameitem.address, gameitem2.logs[0].args[2].toNumber(), auctionPrice, {from: creator, value: listingPrice})
+            createItem3 = await market.createItem(gameitem.address, gameitem3.logs[0].args[2].toNumber(), auctionPrice, {from: creator, value: listingPrice})
+            createItem4 = await market.createItem(gameitem.address, gameitem4.logs[0].args[2].toNumber(), auctionPrice, {from: creator, value: listingPrice})
+            createItem5 = await market.createItem(gameitem.address, gameitem5.logs[0].args[2].toNumber(), auctionPrice, {from: creator, value: listingPrice})
+
+            // console.log("createItem2", createItem2.logs[0].args)
 
             items = await market.getItemList()
             items = await Promise.all(items.map(async i => {
-                const tokenUri = await market.getTokenURI(i.itemId)
+                const tokenUri = await gameitem.tokenURI(i.tokenId)
+                const ownerOf = await gameitem.ownerOf(i.tokenId)
                 let item = {
                     itemId: i.itemId.toString(),
                     price: i.price.toString(),
                     tokenId: i.tokenId.toString(),
-                    owner: i.owner,
+                    onSale: i.onSale,
+                    owner: ownerOf,
+                    tokenUri
+                }
+                return item
+            }))
+            console.log('items: ', items)
+            
+            ownable1 = await gameitem.ownerOf('1')
+            console.log('items1 Ownable ', ownable1)
+
+            await market.buyItem(gameitem3.logs[0].args[2].toNumber(), {from: buyer, value:auctionPrice})
+
+            items = await market.getItemList()
+            items = await Promise.all(items.map(async i => {
+                const tokenUri = await gameitem.tokenURI(i.tokenId)
+                const ownerOf = await gameitem.ownerOf(i.tokenId)
+                let item = {
+                    itemId: i.itemId.toString(),
+                    price: i.price.toString(),
+                    tokenId: i.tokenId.toString(),
+                    onSale: i.onSale,
+                    owner: ownerOf,
                     tokenUri
                 }
                 return item
             }))
             console.log('items: ', items)
 
-            // item1 = await gameitem.createToken("https://tokenTestItem.com1")
-            // item2 = await gameitem.createToken("https://tokenTestItem.com2")
-            // // console.log("item1", item1.toString())
-            // console.log("item1 id", item1.logs[0].args[2].toNumber())
-            // // console.log("item1 id 2", item1.tokenId.toString())
-            // // console.log("item1 value", item1.logs[0].args.toString())
-            // tokenUri = await gameitem.tokenURI(item1.logs[0].args[2].toNumber())
-            // tokenUri2 = await gameitem.tokenURI(item1.logs[0].args[2].toNumber())
-            // console.log("tokenUri", tokenUri.toString())
-            // console.log("tokenUri2", tokenUri2.toString())
+            await market.changeSalePrice(gameitem3.logs[0].args[2].toNumber(), tokens('5'), {from: buyer})
+            await market.changeOnSaleStatus(gameitem3.logs[0].args[2].toNumber(), true, {from: buyer})
 
-            // createdItem = await market.createMarketItem(gameitem.address, item1.logs[0].args[2].toNumber(), auctionPrice, { value: listingPrice })
-            // createdItem2 = await market.createMarketItem(gameitem.address, item2.logs[0].args[2].toNumber(), auctionPrice, { value: listingPrice })
-            
-            // // await market.createMarketSale(gameitem.address, item1.logs[0].args[2].toNumber(), { value: auctionPrice})
-            // await market.createMarketSale(gameitem.address, item1.logs[0].args[2].toNumber(), { value: auctionPrice})
-
-            // items = await market.fetchMarketItems()
-            // items = await Promise.all(items.map(async i => {
-            // const tokenUri = await gameitem.tokenURI(i.tokenId)
-            // let item = {
-            //     price: i.price.toString(),
-            //     tokenId: i.tokenId.toString(),
-            //     seller: i.seller,
-            //     owner: i.owner,
-            //     tokenUri
-            // }
-            // return item
-            // }))
-            // console.log('items: ', items)
+            items = await market.getMyItemList({from:buyer})
+            items = await Promise.all(items.map(async i => {
+                const tokenUri = await gameitem.tokenURI(i.tokenId)
+                const ownerOf = await gameitem.ownerOf(i.tokenId)
+                let item = {
+                    itemId: i.itemId.toString(),
+                    price: i.price.toString(),
+                    tokenId: i.tokenId.toString(),
+                    onSale: i.onSale,
+                    owner: ownerOf,
+                    tokenUri
+                }
+                return item
+            }))
+            console.log('OwnerItems: ', items)
         })
     })
 })
