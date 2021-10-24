@@ -1,0 +1,12 @@
+{
+    "description": "Friendly OpenSea FastFoods.", 
+    "external_url": "http://localhost:3000/game", 
+    "image": "http://localhost:3000/images/fries.png", 
+    "name": "fries",
+    "attributes": [
+        {
+          "trait_type": "Base", 
+          "value": "Foods"
+        }
+    ] 
+  }
