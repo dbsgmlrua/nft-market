@@ -14,13 +14,16 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.serializers import Serializer
+from rest_framework import status
 
 #serializers
-from .serializers import TestSerializer, AttributesSerializer, MetaDataSerializer
+from .serializers import TestSerializer, AttributesSerializer, MetaDataSerializer, ImagePostSerializer
 
 from nfttoken.serializerObjects.testserializers import testSerializerObject
 
-from .models import MetaData, Attributes
+from .models import MetaData, Attributes, NftImage
+
+from django.conf import settings
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
@@ -29,52 +32,59 @@ def Test(request):
     serializer = TestSerializer(testObject)
     return Response(serializer.data)
 
-@api_view(['POST'])
-@permission_classes([AllowAny])
-def TestPost2(request):
-    MetaData.objects.all().delete()
-    Attributes.objects.all().delete()
-    # request_data = request.data
-    # print("request_data", request_data)
-    # attributes_data = request_data.pop('attributes')
-    # print("request_data2", request_data)
-    # print("description", request_data['description'])
-    # metadata = MetaData.objects.create(
-    #     description = request_data['description'],
-    #     external_url = request_data['external_url'],
-    #     image = request_data['image'],
-    #     name = request_data['name']
-    # )
-    # print("metadata", metadata)
-    # for attribute_data in attributes_data:
-    #     print("attribute_data", attribute_data)
-    #     Attributes.objects.create(metadata=metadata, **attribute_data)
+# @api_view(['POST'])
+# @permission_classes([AllowAny])
+# def TestPost(request):
+#     MetaData.objects.all().delete()
+#     Attributes.objects.all().delete()
+#     request_data = request.data
+#     print("request_data", request_data)
+#     metadata_serializer = MetaDataSerializer(data=request_data)
+#     metadata_serializer.is_valid()
+#     metadata_serializer2 = metadata_serializer.save()
+#     print("result2", metadata_serializer2)
 
-    metadata2 = MetaData.objects.first()
+#     metadata = MetaData.objects.last()
+#     print("metadata", metadata)
+#     att = metadata.metadata.all()
+#     metadata.attributes = att
+#     print("att", att)
 
-    print("metadata2", metadata2)
-    serializer = MetaDataSerializer(metadata2)
-    return Response(serializer.data)
-
+#     serializer = MetaDataSerializer(metadata)
+#     return Response(serializer.data)
 
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
-def TestPost(request):
+def postImage(request):
+    serializer = ImagePostSerializer(data = request.data)
+    if serializer.is_valid():
+        serializer.save()
+        # serializer.data['file']
+        print(request.get_host(),serializer.data['file'])
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    else:
+        print('error', serializer.errors)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def getImage(request, id):
+    image = NftImage.objects.filter(id=id).first()
+    print(image.file.url)
+    serializer = ImagePostSerializer(image)
+    return Response(serializer.data)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def mintToken(request):
     MetaData.objects.all().delete()
     Attributes.objects.all().delete()
-    request_data = request.data
-    print("request_data", request_data)
-    metadata_serializer = MetaDataSerializer(data=request_data)
-    metadata_serializer.is_valid()
-    metadata_serializer2 = metadata_serializer.save()
-    print("result2", metadata_serializer2)
-
-    metadata = MetaData.objects.last()
-    print("metadata", metadata)
-    att = metadata.metadata.all()
-    metadata.attributes = att
-    print("att", att)
-
-    serializer = MetaDataSerializer(metadata)
-    return Response(serializer.data)
+    serializer = MetaDataSerializer(data = request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    else:
+        print('error', serializer.errors)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

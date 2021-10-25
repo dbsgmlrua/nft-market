@@ -55,6 +55,7 @@ function App(){
         const market = new web3.eth.Contract(NFTMarket.abi, marketData.address)
         setMarket(market)
         const balanceOf = await market.methods.getItemList().call({from: accounts[0]})
+        console.log("balanceOf", balanceOf)
         const items = await Promise.all(balanceOf.map(async i => {
           const tokenUri = await token.methods.tokenURI(i.tokenId).call()
           const ownerOf = await token.methods.ownerOf(i.tokenId).call()

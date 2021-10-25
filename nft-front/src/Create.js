@@ -1,18 +1,42 @@
 import { Container, Form, Button } from "react-bootstrap";
 import { useState, useEffect } from 'react';
+import axios from "axios";
 const Create = (account, createContent) => {
     const [formInput, updateFormInput] = useState({price: '', name: '', description: ''});
-    const [fileUrl, setFileUrl] = useState(null);
+    const [fileUrl, setFileUrl] = useState();
+    const [file, setFile] = useState();
 
     function onChangeFile(e){
         setFileUrl(e.target.files[0]);
+    }
+    const newPicture = () => {
+        if(formInput.description){
+            console.log("dlTek")
+        } else{
+            window.alert('Need description')
+        }
+
+        // let form_data = new FormData();
+        // form_data.append('file', fileUrl, fileUrl.name);
+        // form_data.append('title', formInput.name);
+        // let url = 'http://localhost:8000/tokens/postimage'
+        // axios.post(url, form_data, {
+        //     headers: {
+        //       'content-type': 'multipart/form-data'
+        //     }
+        // })
+        // .then(res => {
+        //     // console.log(res);
+        //     console.log(res.data.file);
+        // })
+        // .catch(err=> console.log(err))
     }
     
     return ( 
         <Container className="center-block col-md-6 m-5">
         <Form onSubmit={(event) => {
-            event.proventDefault()
-            createContent(formInput, fileUrl)
+            // event.proventDefault()
+            // createContent(formInput, fileUrl)
         }}>
             <Form.Group className="mb-3" controlId="formBasicName">
                 <Form.Label>Asset Name</Form.Label>
@@ -58,7 +82,10 @@ const Create = (account, createContent) => {
                     <img src={fileUrl} className="rounded mt-4" />
                 }
             </Form.Group>
-            <Button variant="primary" type="submit">
+            {/* <Button variant="primary" type="submit">
+                Submit
+            </Button> */}
+            <Button variant="primary" onClick={newPicture}>
                 Submit
             </Button>
         </Form>
