@@ -14,6 +14,7 @@ import NFTMarket from './abis/NFTMarket.json'
 function App(){
   const [account, setAccount] = useState('');
   const [gamja, setGamja] = useState(null);
+  const [gamjaAddress, setGamjaAddress] = useState('');
   const [market, setMarket] = useState(null);
   const [marketItems, setMarketItems] = useState([])
   useEffect(() => {
@@ -45,34 +46,18 @@ function App(){
       let token
       if(gamjaData){
         token = new web3.eth.Contract(Gamja.abi, gamjaData.address)
+        setGamjaAddress(gamjaData.address)
         setGamja(token)
       }else{
-        window.alert('MemoryToken contract not deployed to detected network.')
+        window.alert('Token contract not deployed to detected network.')
       }
 
       const marketData = NFTMarket.networks[networkId]
       if(marketData){
         const market = new web3.eth.Contract(NFTMarket.abi, marketData.address)
         setMarket(market)
-        const balanceOf = await market.methods.getItemList().call({from: accounts[0]})
-        console.log("balanceOf", balanceOf)
-        const items = await Promise.all(balanceOf.map(async i => {
-          const tokenUri = await token.methods.tokenURI(i.tokenId).call()
-          const ownerOf = await token.methods.ownerOf(i.tokenId).call()
-          let item = {
-              itemId: i.itemId.toString(),
-              price: i.price.toString(),
-              tokenId: i.tokenId.toString(),
-              onSale: i.onSale,
-              owner: ownerOf,
-              tokenUri
-          }
-          return item
-      }))
-      setMarketItems(items)
-      console.log("items", items)
       }else{
-        window.alert('MemoryToken contract not deployed to detected network.')
+        window.alert('Market contract not deployed to detected network.')
       }
     }
 
@@ -85,10 +70,10 @@ function App(){
         <div className="content">
           <Switch>
             <Route exact path="/">
-              {market && <Home items={marketItems}/>}
+              {(market && gamja) && <Home account={account} gamja={gamja} market= {market} items={marketItems}/>}
             </Route>
             <Route path="/create">
-              {(market && gamja) && <Create account={account} gamja={gamja} market= {market}/>}
+              {(market && gamja) && <Create account={account} gamja={gamja} market= {market} gamjaAddress={gamjaAddress}/>}
             </Route>
             <Route path="/collection">
               <Collections />

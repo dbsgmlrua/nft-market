@@ -6,6 +6,7 @@ const Create = (webdata) => {
     const [fileUrl, setFileUrl] = useState();
     const [file, setFile] = useState();
     const [gamja, setGamja] = useState();
+    const [gamjaAddress, setGamjaAddress] = useState('');
     const [account, setAccount] = useState();
     const [market, setMarket] = useState();
 
@@ -13,6 +14,7 @@ const Create = (webdata) => {
         setGamja(webdata.gamja)
         setAccount(webdata.account)
         setMarket(webdata.market)
+        setGamjaAddress(webdata.gamjaAddress)
     }, [webdata])
 
     function tokens(n) {
@@ -26,24 +28,64 @@ const Create = (webdata) => {
         if(!formInput.description){
             window.alert('Need description')
         }else{
-            const attributes = []
-
-            for(var i=0;i<10;i++){
-                let attData = {
-                    trait_type: "att_" + i,
-                    value: i
+            var base = window.location.href.split(':')
+            var backendhost = base[0] + ':' + base[1] + ':8000/'
+            let form_data = new FormData();
+            form_data.append('file', fileUrl, fileUrl.name);
+            form_data.append('title', formInput.name);
+            let url = backendhost + 'tokens/postimage'
+            axios.post(url, form_data, {
+                headers: {
+                  'content-type': 'multipart/form-data'
                 }
-                attributes.push(attData)
-            }
+            })
+            .then(res => {
+                console.log(res.data.file);
+                mintToken(res.data.file);
+            })
+            .catch(err=> console.log(err))
+        }
+    }
+    async function mintToken(file){
+        const gamjaId = await gamja.methods._tokenIds().call()
+        let count = parseInt(gamjaId)
+        count = count + 1
+        var base = window.location.href.split(':')
+        var backendhost = base[0] + ':' + base[1] + ':8000/'
+        let uri = backendhost + 'tokens/gettoken/' + count
+        console.log("uri", uri)
+        await gamja.methods.createToken(uri).send({from: account})
+        .on('receipt', (receipt) => {
+            console.log("resultado =", receipt)
+            let idresult = receipt.events.Transfer.returnValues[2]
+            console.log("id result =", idresult)
+            createItem(idresult, file)
+        })
+    }
+    async function createItem(token_id, file){
+        let listingPrice = await market.methods.listingPrice().call()
+        await market.methods.createItem(gamjaAddress, token_id, tokens(formInput.price)).send({from: account, value: listingPrice})
+        .on('receipt', (receipt) => {
+            console.log("marketresultado =", receipt)
+            let idresult = receipt.events.MarketItemCreated.returnValues[0]
+            console.log("marketid result =", idresult)
+            // const attributes = []
 
+            // for(var i=0;i<10;i++){
+            //     let attData = {
+            //         trait_type: "att_" + i,
+            //         value: i
+            //     }
+            //     attributes.push(attData)
+            // }
             let data = {
-                item_id: 1,
-                token_id: 1,
+                item_id: idresult,
+                token_id: token_id,
                 description: formInput.description,
                 external_url: "http://localhost:3000/",
-                image: 'http://localhost:8000/tokens/minttoken',
+                image: file,
                 name: formInput.name,
-                attributes: attributes
+                attributes: []
             }
             let url = 'http://localhost:8000/tokens/minttoken'
             axios.post(url, data)
@@ -51,40 +93,7 @@ const Create = (webdata) => {
                 console.log(res.data);
             })
             .catch(err=> console.log(err))
-
-            // let form_data = new FormData();
-            // form_data.append('file', fileUrl, fileUrl.name);
-            // form_data.append('title', formInput.name);
-            // let url = 'http://localhost:8000/tokens/postimage'
-            // axios.post(url, form_data, {
-            //     headers: {
-            //       'content-type': 'multipart/form-data'
-            //     }
-            // })
-            // .then(res => {
-            //     console.log(res.data.file);
-            //     mintToken(res.data.file);
-            // })
-            // .catch(err=> console.log(err))
-        }
-    }
-    async function mintToken(file){
-        const gamjaId = await gamja.methods._tokenIds().call()
-        let count = parseInt(gamjaId)
-        count = count + 1
-        let uri = 'http://localhost:8000/tokens/getyoken/' + count
-        console.log("uri", uri)
-        await gamja.methods.createToken(uri).send({from: account})
-        .on('receipt', (receipt) => {
-            console.log("resultado =", receipt)
-            let idresult = receipt.events.Transfer.returnValues[2]
-            console.log("id result =", idresult)
-            createItem(idresult)
         })
-    }
-    async function createItem(token_id){
-        let listingPrice = await market.methods.listingPrice().call()
-        await market.methods.createItem(gamja.address, token_id, tokens('1'), {from: account, value: listingPrice})
     }
     
     return ( 

@@ -17,7 +17,7 @@ from rest_framework.serializers import Serializer
 from rest_framework import status
 
 #serializers
-from .serializers import TestSerializer, AttributesSerializer, MetaDataSerializer, ImagePostSerializer
+from .serializers import TestSerializer, AttributesSerializer, MetaDataSerializer, MetaDataGetSerializer, ImagePostSerializer
 
 from nfttoken.serializerObjects.testserializers import testSerializerObject
 
@@ -90,9 +90,8 @@ def mintToken(request):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def getToken(request, id):
-    metadata = MetaData.objects.filter(id=id).first()
+    metadata = MetaData.objects.filter(token_id=id).first()
     att = metadata.metadata.all()
     metadata.attributes = att
-    print("att", att)
-    serializer = MetaDataSerializer(metadata)
+    serializer = MetaDataGetSerializer(metadata, context={'base_url': request.get_host()})
     return Response(serializer.data)
