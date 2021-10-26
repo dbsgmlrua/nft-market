@@ -2,6 +2,7 @@ from django.db import models
 from django.db.models.deletion import CASCADE
 
 class MetaData(models.Model):
+    token_id = models.IntegerField(default=0)
     item_id = models.IntegerField(default=0)
     description = models.TextField(null=True)
     external_url = models.TextField(null=True)

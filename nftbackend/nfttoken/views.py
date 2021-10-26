@@ -79,8 +79,6 @@ def getImage(request, id):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def mintToken(request):
-    MetaData.objects.all().delete()
-    Attributes.objects.all().delete()
     serializer = MetaDataSerializer(data = request.data)
     if serializer.is_valid():
         serializer.save()
@@ -88,3 +86,13 @@ def mintToken(request):
     else:
         print('error', serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def getToken(request, id):
+    metadata = MetaData.objects.filter(id=id).first()
+    att = metadata.metadata.all()
+    metadata.attributes = att
+    print("att", att)
+    serializer = MetaDataSerializer(metadata)
+    return Response(serializer.data)

@@ -88,7 +88,7 @@ function App(){
               {market && <Home items={marketItems}/>}
             </Route>
             <Route path="/create">
-              <Create />
+              {(market && gamja) && <Create account={account} gamja={gamja} market= {market}/>}
             </Route>
             <Route path="/collection">
               <Collections />

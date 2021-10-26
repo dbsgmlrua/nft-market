@@ -3,7 +3,8 @@ import { useState, useEffect } from 'react';
 import ethLogo from './eth-logo.png'
 const Home = (items) => {
     useEffect(() => {
-
+        if(items)
+            console.log(items);
     }, [items])
     return ( 
         <Container>
