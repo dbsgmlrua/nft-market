@@ -7,6 +7,7 @@ import Home from './Home';
 import Create from './Create';
 import Game from './Game';
 import Collections from './Collections';
+import DetailPage from './DetailPage';
 
 import Gamja from './abis/Gamja.json'
 import NFTMarket from './abis/NFTMarket.json'
@@ -76,7 +77,10 @@ function App(){
               {(market && gamja) && <Create account={account} gamja={gamja} market= {market} gamjaAddress={gamjaAddress}/>}
             </Route>
             <Route path="/collection">
-              <Collections />
+              {(market && gamja) && <Collections account={account} gamja={gamja} market= {market} items={marketItems}/>}
+            </Route>
+            <Route path="/item/:id">
+              {(market && gamja) && <DetailPage account={account} gamja={gamja} market= {market}/>}
             </Route>
           </Switch>
         </div>

@@ -1,6 +1,7 @@
 import { Container, Form, Button, Image } from "react-bootstrap";
 import { useState, useEffect } from 'react';
 import axios from "axios";
+import {useHistory} from 'react-router-dom';
 const Create = (webdata) => {
     const [formInput, updateFormInput] = useState({price: '', name: '', description: ''});
     const [fileUrl, setFileUrl] = useState();
@@ -9,6 +10,7 @@ const Create = (webdata) => {
     const [gamjaAddress, setGamjaAddress] = useState('');
     const [account, setAccount] = useState();
     const [market, setMarket] = useState();
+    const history = useHistory();
 
     useEffect(()=>{
         setGamja(webdata.gamja)
@@ -87,10 +89,13 @@ const Create = (webdata) => {
                 name: formInput.name,
                 attributes: []
             }
-            let url = 'http://localhost:8000/tokens/minttoken'
+            var base = window.location.href.split(':')
+            var backendhost = base[0] + ':' + base[1] + ':8000/'
+            let url = backendhost + 'tokens/minttoken'
             axios.post(url, data)
             .then(res => {
                 console.log(res.data);
+                history.push('/');
             })
             .catch(err=> console.log(err))
         })
