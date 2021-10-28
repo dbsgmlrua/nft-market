@@ -51,6 +51,7 @@ const Home = (webdata) => {
     }
     return ( 
         <Container>
+            {(items && items.length == 0) && <div className="col-md-8 p-3"> <h1>Nothing to display...</h1> </div>}
             <CardGroup>
                 {items && items.map((item, key) => {
                     return(
@@ -65,7 +66,7 @@ const Home = (webdata) => {
                                     <Card.Text align="right"><FontAwesomeIcon icon={faEthereum} size="lg"/>&nbsp;&nbsp;{item.price}&nbsp;ETH</Card.Text>
                                 </Card.Body>
                                 <ListGroup className="list-group-flush">
-                                    <ListGroupItem><Button variant="info">Buy</Button></ListGroupItem>
+                                    <ListGroupItem><Button variant="info" disabled={account == item.owner}>Buy</Button></ListGroupItem>
                                 </ListGroup>
                             </Card>
                         </div>

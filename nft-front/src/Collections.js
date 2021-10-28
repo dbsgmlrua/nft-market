@@ -53,6 +53,7 @@ const Collections = (webdata) => {
     }
     return ( 
         <Container>
+            {(items && items.length == 0) && <div className="col-md-8 p-3"> <h1>Nothing to display...</h1> </div>}
             <CardGroup>
                 {items && items.map((item, key) => {
                     return(
@@ -70,9 +71,6 @@ const Collections = (webdata) => {
                                             
                                     </Card.Text>
                                 </Card.Body>
-                                <ListGroup className="list-group-flush">
-                                    <ListGroupItem><Button variant="info">Buy</Button></ListGroupItem>
-                                </ListGroup>
                             </Card>
                         </div>
                     )
