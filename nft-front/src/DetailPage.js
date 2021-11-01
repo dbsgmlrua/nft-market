@@ -1,6 +1,6 @@
 import { useHistory, useParams } from "react-router";
 import { useState, useEffect } from 'react';
-import { Container, Row, Modal, Button, InputGroup, FormControl } from "react-bootstrap";
+import { Container, Row, Modal, Button, InputGroup, FormControl, Card, CardGroup } from "react-bootstrap";
 import ethLogo from './eth-logo.png'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEthereum } from "@fortawesome/free-brands-svg-icons";
@@ -53,7 +53,6 @@ const DetailPage = (webdata) => {
         const tokenUri = await gamja.methods.tokenURI(balanceOf.tokenId).call()
         const ownerOf = await gamja.methods.ownerOf(balanceOf.tokenId).call()
         const response = await axios.get(tokenUri)
-
         let item = {
             itemId: balanceOf.itemId.toString(),
             price: getPrice(balanceOf.price.toString()),
@@ -63,6 +62,7 @@ const DetailPage = (webdata) => {
             tokenUri,
             image: response.data.image,
             name: response.data.name,
+            attributes: response.data.attributes,
             description: response.data.description
         }
 
@@ -115,6 +115,26 @@ const DetailPage = (webdata) => {
             <Row>
                 <div className="col-md-6 m-2">
                     <img src={item.image} width="100%" height="auto" />
+                    <hr />
+                    <h3>Properties</h3>
+                    <Row>
+                        <CardGroup>
+                            {item.attributes && item.attributes.map((x,i)=>{
+                                return(
+                                    <div className="col-md-3 p-1" key={i}>
+                                        <Card className="text-center">
+                                            <Card.Body>
+                                                <Card.Subtitle className="mb-2 text-muted ">{x.trait_type}</Card.Subtitle>
+                                                <Card.Text>
+                                                    {x.value}
+                                                </Card.Text>
+                                            </Card.Body>
+                                        </Card>
+                                    </div>
+                                )
+                            })}
+                        </CardGroup>
+                    </Row>
                 </div>
                 <div className="col-md-5 m-2">
                     <h1>{item.name}</h1>

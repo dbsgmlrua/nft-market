@@ -1,19 +1,16 @@
-import { Container, Form, Button, Image } from "react-bootstrap";
+import { Container, Form, Button, CloseButton } from "react-bootstrap";
 import { useState, useEffect } from 'react';
 import axios from "axios";
 import {useHistory} from 'react-router-dom';
 const Create = (webdata) => {
     const [formInput, updateFormInput] = useState({price: '', name: '', description: ''});
     const [fileUrl, setFileUrl] = useState();
-    const [file, setFile] = useState();
     const [gamja, setGamja] = useState();
     const [gamjaAddress, setGamjaAddress] = useState('');
     const [account, setAccount] = useState();
     const [market, setMarket] = useState();
 
-    const [attributeList, setAttributeList] = useState([
-        {trait_type: "", value: ""}
-    ]);
+    const [attributeList, setAttributeList] = useState([]);
 
     const handleAttributeChange = (e, index) =>{
         const { name, value } = e.target;
@@ -47,7 +44,19 @@ const Create = (webdata) => {
     function onChangeFile(e){
         setFileUrl(e.target.files[0]);
     }
+    function checkAttributes(){
+        for(var i = 0; i< attributeList.length;i++){
+            if(!attributeList[i].trait_type || !attributeList[i].value){
+                return true;
+            }
+        }
+        return false;
+    }
     const newPicture = () => {
+        if(checkAttributes){
+            window.alert('Attributes must not be empty')
+            return;
+        }
         if(!formInput.description){
             window.alert('Need description')
         }else{
@@ -176,6 +185,8 @@ const Create = (webdata) => {
             {/* <Button variant="primary" type="submit">
                 Submit
             </Button> */}
+            <label>Set Attribute</label>
+            <Button variant="primary" onClick={handleAddAttributeInput}>Add</Button>
             {attributeList.map((item, i) => {
                 return(
                     <div key={i} className="box">
@@ -184,23 +195,24 @@ const Create = (webdata) => {
                             name="trait_type"
                             placeholder="Trait type"
                             value={item.trait_type}
-                            className="mr10"
+                            className="mr10 m-1"
                             onChange={e => handleAttributeChange(e, i)}
                         />
+
                         <input 
-                            type="text" 
-                            name="value"
-                            placeholder="Trait value"
-                            value={item.value}
-                            className="mr10"
-                            onChange={e => handleAttributeChange(e, i)}
-                        />
-                        {attributeList.length !== 1 && <Button variant="primary" onClick={()=>handleRemoveAttributeInput(i)}>Remove</Button>}
-                        {attributeList.length - 1 === i && <Button variant="primary" onClick={handleAddAttributeInput}>Add</Button>}
-                        
+                                type="text" 
+                                name="value"
+                                placeholder="Trait value"
+                                value={item.value}
+                                className="mr10 m-1"
+                                onChange={e => handleAttributeChange(e, i)}
+                        /> 
+                        {/* <Button variant="Link" className="m-1" onClick={()=>handleRemoveAttributeInput(i)}>&#10006;</Button> */}
+                        <CloseButton onClick={()=>handleRemoveAttributeInput(i)} />
                     </div>
                 )
             })}
+            <br />
             <Button variant="primary" onClick={newPicture}>
                 Submit
             </Button>
