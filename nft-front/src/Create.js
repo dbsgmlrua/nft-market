@@ -10,6 +10,27 @@ const Create = (webdata) => {
     const [gamjaAddress, setGamjaAddress] = useState('');
     const [account, setAccount] = useState();
     const [market, setMarket] = useState();
+
+    const [attributeList, setAttributeList] = useState([
+        {trait_type: "", value: ""}
+    ]);
+
+    const handleAttributeChange = (e, index) =>{
+        const { name, value } = e.target;
+        const list = [...attributeList];
+        list[index][name] = value;
+        setAttributeList(list);
+    }
+    const handleAddAttributeInput = () =>{
+        setAttributeList([...attributeList, {trait_type: "", value: ""}]);
+    }
+
+    const handleRemoveAttributeInput = index => {
+        const list = [...attributeList];
+        list.splice(index,1);
+        setAttributeList(list)
+    }
+
     const history = useHistory();
 
     useEffect(()=>{
@@ -87,7 +108,7 @@ const Create = (webdata) => {
                 external_url: "http://localhost:3000/",
                 image: file,
                 name: formInput.name,
-                attributes: []
+                attributes: attributeList
             }
             var base = window.location.href.split(':')
             var backendhost = base[0] + ':' + base[1] + ':8000/'
@@ -155,6 +176,31 @@ const Create = (webdata) => {
             {/* <Button variant="primary" type="submit">
                 Submit
             </Button> */}
+            {attributeList.map((item, i) => {
+                return(
+                    <div key={i} className="box">
+                        <input 
+                            type="text" 
+                            name="trait_type"
+                            placeholder="Trait type"
+                            value={item.trait_type}
+                            className="mr10"
+                            onChange={e => handleAttributeChange(e, i)}
+                        />
+                        <input 
+                            type="text" 
+                            name="value"
+                            placeholder="Trait value"
+                            value={item.value}
+                            className="mr10"
+                            onChange={e => handleAttributeChange(e, i)}
+                        />
+                        {attributeList.length !== 1 && <Button variant="primary" onClick={()=>handleRemoveAttributeInput(i)}>Remove</Button>}
+                        {attributeList.length - 1 === i && <Button variant="primary" onClick={handleAddAttributeInput}>Add</Button>}
+                        
+                    </div>
+                )
+            })}
             <Button variant="primary" onClick={newPicture}>
                 Submit
             </Button>
