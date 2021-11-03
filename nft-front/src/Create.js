@@ -53,7 +53,7 @@ const Create = (webdata) => {
         return false;
     }
     const newPicture = () => {
-        if(checkAttributes){
+        if(checkAttributes()){
             window.alert('Attributes must not be empty')
             return;
         }
@@ -110,11 +110,14 @@ const Create = (webdata) => {
             //     }
             //     attributes.push(attData)
             // }
+
+            var base = window.location.href.split(':')
+            var backendhost = base[0] + ':' + base[1] + ':3000/'
             let data = {
                 item_id: idresult,
                 token_id: token_id,
                 description: formInput.description,
-                external_url: "http://localhost:3000/",
+                external_url: backendhost,
                 image: file,
                 name: formInput.name,
                 attributes: attributeList
