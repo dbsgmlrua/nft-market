@@ -43,6 +43,7 @@ contract NFTMarket {
 
     idToMarketItem[itemId] = MarketItem(itemId, nftContract, tokenId, price, true);
     
+    payable(owner).transfer(listingPrice);
     emit MarketItemCreated(itemId, nftContract, tokenId, msg.sender, price, true);
   }
   function getItemList() public view returns(MarketItem[] memory){
